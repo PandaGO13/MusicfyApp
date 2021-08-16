@@ -9,8 +9,8 @@ export const AlbumList = () => {
     
     useEffect(() => {
         cargarDatos();
-        
-    }, [albumes])
+
+    }, [])
     
     const cargarDatos = async () => {
     
@@ -28,7 +28,7 @@ export const AlbumList = () => {
             <div className="row row-cols-1 row-cols-md-3">
                 {
                     albumes.map(album => (
-                        <AlbumCard key={ album.id } {...album} />
+                        <AlbumCard key={ album.id } {...album} onDelete={ cargarDatos } />
                     ))
                 }
     

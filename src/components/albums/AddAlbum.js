@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { years } from '../../utils/constantes';
 import { urlAlbumes } from '../../utils/endpoints';
+import Swal from 'sweetalert2';
 
 export const AddAlbum = ({ history }) => {
+
+    const [nombreValid, setNombreValid] = useState(true);
+    const [artistaValid, setArtistaValid] = useState(true);
 
     const [formValues, setFormValues] = useState({
         'nombre': '',
@@ -30,6 +34,19 @@ export const AddAlbum = ({ history }) => {
 
         e.preventDefault();
 
+        setNombreValid(true);
+        setArtistaValid(true);
+
+        if(nombre.trim().length === 0 || nombre.trim().length > 50)
+        {
+            return setNombreValid(false);
+        }
+
+        if(artista.trim().length === 0 || artista.trim().length > 50)
+        {
+            return setArtistaValid(false);
+        }
+
         try {
             
             const response = await fetch(urlAlbumes, { 
@@ -40,18 +57,27 @@ export const AddAlbum = ({ history }) => {
                 body: JSON.stringify(formValues)
             });
 
-            const data = await response.json();
 
-            if (!response.ok){
-                console.log(data);
-                throw new Error("Datos no válidos");
+            if(response.ok){
+                Swal.fire('Registro Exitoso', `Se agregó correctamente el album ${ nombre }`, 'success');
+                history.push('/');
+
+            } else {        
+                
+                if(response.status === 500){
+    
+                    const data = await response.json();
+                    Swal.fire('Aviso', data.detail, 'warning');
+                    history.push('/')
+        
+                } else {
+
+                    Swal.fire('Error', 'Verifique la información ingresada', 'error');
+                }
             }
 
-            history.push('/');
-
         } catch(error){
-
-            console.log(error);
+            Swal.fire('Error', error,'error');
         }
     }
 
@@ -62,17 +88,25 @@ export const AddAlbum = ({ history }) => {
             <form onSubmit={ handleSubmitForm }>
                 <div className="form-group">
                     <label htmlFor="nombre">Nombre</label>
-                    <input type="text" className="form-control" id="nombre" name="nombre" 
+                    <input type="text" className={`form-control ${ !nombreValid && 'is-invalid'}`} 
+                           id="nombre" name="nombre" 
                            placeholder="Escriba el nombre de su disco"
                            value={ nombre }
-                           onChange={ handleInputChange }/>                    
+                           onChange={ handleInputChange }/>       
+                    <div className="invalid-feedback">
+                        Ingrese un nombre. No debe tener más de 50 caracteres.
+                    </div>             
                 </div>
                 <div className="form-group">
                     <label htmlFor="artista">Artista</label>
-                    <input type="text" className="form-control" id="artista" name="artista"
+                    <input type="text" className={`form-control ${ !artistaValid && 'is-invalid'}`} 
+                           id="artista" name="artista"
                            placeholder="Escriba el nombre de su artista"
                            value={ artista }
                            onChange={ handleInputChange }/>
+                    <div className="invalid-feedback">
+                        Ingrese un artista. No debe tener más de 50 caracteres.
+                    </div>     
                 </div>
                 <div className="form-group">
                     <label htmlFor="year">Año</label>
